@@ -90,15 +90,16 @@ public class MyMod {
         if (event.getItemStack().isEmpty()) return;
 
         PoseStack poseStack = event.getPoseStack();
-        HumanoidArm mainArm = mc.player.getMainArm();
-        HumanoidArm currentArm = (event.getHand() == InteractionHand.MAIN_HAND) ? mainArm : mainArm.getOpposite();
 
-        if (currentArm == HumanoidArm.RIGHT) {
+        // СТРОГОЕ PvP-РАЗДЕЛЕНИЕ: Проверяем физический слот руки в движке игры напрямую
+        if (event.getHand() == InteractionHand.MAIN_HAND) {
+            // Правая рука (или левая, если включен режим левши)
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
         } 
-        else if (currentArm == HumanoidArm.LEFT) {
+        else if (event.getHand() == InteractionHand.OFF_HAND) {
+            // Левая рука (оффхенд / щит / тотем)
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
