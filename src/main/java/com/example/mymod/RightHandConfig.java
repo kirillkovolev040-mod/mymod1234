@@ -13,8 +13,11 @@ public class RightHandConfig {
     public static float leftZ = -0.45f;
     public static int leftScalePercent = 40; 
     
-    // Выбранная анимация (0 - Выкл, 1 - Плавный 1.7, 2 - PvP Круговой, 3 - Слайд/Блок-хит, 4 - Хлыст, 5 - Вращение)
+    // Анимации и визуал
     public static int swingMode = 1; 
     public static int activeParticleId = 0;
     public static int crosshairColorId = 0; 
+
+    // Высота огня на экране в процентах (от 0% до 100%)
+    public static int fireHeightPercent = 40; 
 }
