@@ -100,14 +100,11 @@ public class MyMod {
         PoseStack poseStack = event.getPoseStack();
         float swingProgress = event.getSwingProgress();
 
-        // АНАТОМИЧЕСКИЙ ФИЛЬТР: Проверяем физическую сторону модели игрока (Правая/Левая)
-        HumanoidArm mainArm = mc.player.getMainArm();
-        HumanoidArm currentArm = (event.getHand() == InteractionHand.MAIN_HAND) ? mainArm : mainArm.getOpposite();
-
-        if (currentArm == HumanoidArm.RIGHT) {
-            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
+        // ЖЕЛЕЗОБЕТОННАЯ ИЗОЛЯЦИЯ: Делим строго по физическому типу слота NeoForge
+        if (event.getHand() == InteractionHand.MAIN_HAND) {
+            poseStack.pushPose(); // Изолируем матрицу ПРАВОЙ руки
             
-            // Сдвиг и размер только для ПРАВОЙ руки
+            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -116,42 +113,34 @@ public class MyMod {
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
                 
                 if (RightHandConfig.swingMode == 1) {
-                    // Плавный замах 1.7
+                    // 1. Плавный замах 1.7
                     poseStack.translate(0.0f, f * 0.08f, 0.0f);
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -18.0f));
                     poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -12.0f));
                 } 
                 else if (RightHandConfig.swingMode == 2) {
-                    // ИСПРАВЛЕНО: Правильный PvP Круговой взмах через фиксированную точку центра
-                    poseStack.translate(f1 * 0.15f, f * -0.08f, f1 * -0.05f);
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -45.0f));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -30.0f));
-                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * 10.0f));
-                } 
-                else if (RightHandConfig.swingMode == 3) {
-                    // Горизонтальный Слайд
+                    // 2. Горизонтальный Слайд (Блокхит)
                     poseStack.translate(f1 * -0.15f, 0.0f, f * 0.05f);
                     poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -45.0f));
                     poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -10.0f));
                 } 
-                else if (RightHandConfig.swingMode == 4) {
-                    // Хлыст (Lunar Style)
+                else if (RightHandConfig.swingMode == 3) {
+                    // 3. Хлыст (Lunar Style)
                     poseStack.translate(0.0f, f1 * -0.2f, f * 0.1f);
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
-                } 
-                else if (RightHandConfig.swingMode == 5) {
-                    // ИСПРАВЛЕНО: Статичный режим (Меч вообще не двигается при ударе)
-                    // Отменяем дефолтное падение руки Майнкрафта, сдвигая матрицу в противофазу
-                    poseStack.translate(0.0f, f * -0.15f, f * 0.15f);
                 }
             }
+            poseStack.popPose(); // Сбрасываем изменения, закрывая доступ для левой руки
         } 
-        else if (currentArm == HumanoidArm.LEFT) {
-            float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
+        else if (event.getHand() == InteractionHand.OFF_HAND) {
+            poseStack.pushPose(); // Изолируем матрицу ЛЕВОЙ руки
             
-            // ЛЕВАЯ рука на 100% изолирована от правых настроек и анимаций!
+            float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
+            // Левая рука использует исключительно левые конфиги (Клавиша I)
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
+            
+            poseStack.popPose(); // Закрываем стек левой руки
         }
     }
 }
