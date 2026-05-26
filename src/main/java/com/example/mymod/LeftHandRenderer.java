@@ -12,16 +12,17 @@ public class LeftHandRenderer {
         if (event.getHand() == InteractionHand.OFF_HAND) {
             PoseStack poseStack = event.getPoseStack();
             
-            // Изолируем только наши кастомные PvP-сдвиги, не ломая ванильное покачивание игры
-            poseStack.pushPose();
+            // АНТИ-БАГ МАТРИЦЫ: Принудительно вычитаем правые настройки, если они застряли в памяти
+            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
+            if (rightScaleMultiplier > 0.0f) {
+                poseStack.scale(1.0f / rightScaleMultiplier, 1.0f / rightScaleMultiplier, 1.0f / rightScaleMultiplier);
+            }
+            poseStack.translate(-RightHandConfig.rightX, -RightHandConfig.rightY, -RightHandConfig.rightZ);
             
+            // ТЕПЕРЬ НАКЛАДЫВАЕМ ЧИСТЫЕ ЛЕВЫЕ НАСТРОЙКИ (Клавиша I)
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
-            
-            // Применяем чистые настройки расположения и масштаба для ЛЕВОЙ руки (Клавиша I)
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
-            
-            poseStack.popPose();
         }
     }
 }
