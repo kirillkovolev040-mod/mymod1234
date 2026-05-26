@@ -16,6 +16,6 @@ public class RightHandConfig {
     public static int crosshairColorId = 0; 
 
     // Огонь изначально на 100%, чтобы плавно убавлять в меню J по 5%
-    public static int fireHeightPercent = 120; 
+    public static int fireHeightPercent = 100; 
     public static int maxHitParticles = 12; 
 }
