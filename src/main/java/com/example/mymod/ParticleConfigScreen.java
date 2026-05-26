@@ -8,10 +8,9 @@ import net.minecraft.network.chat.Component;
 public class ParticleConfigScreen extends Screen {
     public ParticleConfigScreen() { super(Component.literal("Сетка PvP Частиц")); }
 
-    // УБИРАЕМ МЫЛО: Переопределяем метод, чтобы размытие не включалось на фоне сетки
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, this.width, this.height, 0x60000000);
+        graphics.fill(0, 0, this.width, this.height, 0x60000000); // Без мыла
     }
 
     private void drawGridButton(GuiGraphics g, String text, int x, int y, int w, int h, int mx, int my, boolean active) {
