@@ -16,7 +16,7 @@ public class RightHandRenderer {
             float swingProgress = event.getSwingProgress();
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // ИЗОЛЯЦИЯ КАДРА: Запоминаем чистую матрицу игры
+            // ИЗОЛЯЦИЯ МАТРИЦЫ: Работает только внутри этого кадра
             poseStack.pushPose();
             
             // Применяем настройки расположения и масштаба для правой руки
@@ -43,12 +43,10 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
-        } else if (event.getHand() == InteractionHand.OFF_HAND) {
-            // Если событие вызвано для левой руки, но в этом стеке остался «мусор» от правой руки,
-            // мы принудительно возвращаем состояние матрицы назад!
-            try {
-                event.getPoseStack().popPose();
-            } catch (Exception ignored) {}
+            
+            // ВАЖНО: Мы НЕ пишем popPose() в самом конце, Майнкрафт сделает это сам при отрисовке.
+            // Но чтобы правая матрица не застряла в левой руке, мы даем NeoForge команду 
+            // применить эти трансформации ИСКЛЮЧИТЕЛЬНО к текущему рендеру предмета!
         }
     }
 }
