@@ -35,13 +35,13 @@ public class ParticleConfigScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics, mouseX, mouseY, partialTick);
         int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, "==== СЕТКА PvP ЧАСТИЦ (56 ЭФФЕКТОВ) ====", this.width / 2, cy - 120, 0xFFFF55);
+        graphics.drawCenteredString(this.font, "==== СЕТКА PvP ЧАСТИЦ (56 ЭФФЕКТОВ) ====", this.width / 2, cy - 122, 0xFFFF55);
         int startX = this.width / 2 - 256; int startY = cy - 105;
         int hoveredParticleId = -1; int buttonId = 0;
         
         for (int col = 0; col < 7; col++) {
             for (int row = 0; row < 8; row++) {
-                int btnX = startX + (col * 73); int btnY = startY + (row * 20);
+                int btnX = startX + (col * 73); int btnY = startY + (row * 21);
                 boolean isActive = (RightHandConfig.activeParticleId == buttonId);
                 drawGridButton(graphics, getShortName(buttonId), btnX, btnY, 70, 16, mouseX, mouseY, isActive);
                 if (mouseX >= btnX && mouseX <= btnX + 70 && mouseY >= btnY && mouseY <= btnY + 16) { hoveredParticleId = buttonId; }
@@ -49,11 +49,11 @@ public class ParticleConfigScreen extends Screen {
             }
         }
         String hintText = (hoveredParticleId != -1) ? "Выбрано: " + getFullName(hoveredParticleId) : "Наведите на кнопку, чтобы увидеть полное название";
-        graphics.drawCenteredString(this.font, hintText, this.width / 2, cy + 62, (hoveredParticleId != -1) ? 0x55FFFF : 0x777777);
+        graphics.drawCenteredString(this.font, hintText, this.width / 2, cy + 64, (hoveredParticleId != -1) ? 0x55FFFF : 0x777777);
         
         // Панель выбора цвета прицела
         graphics.drawCenteredString(this.font, "==== ЦВЕТ ПРИЦЕЛА ====", this.width / 2, cy + 76, 0x55FF55);
-        int colorStartX = this.width / 2 - 180; int colorY = cy + 88;
+        int colorStartX = this.width / 2 - 180; int colorY = cy + 86;
         String[] colors = {"Обычный", "Зеленый", "Красный", "Синий", "Желтый"};
         for (int i = 0; i < 5; i++) {
             boolean isColorActive = (RightHandConfig.crosshairColorId == i);
@@ -61,11 +61,18 @@ public class ParticleConfigScreen extends Screen {
         }
 
         // Панель настройки уровня огня
-        graphics.drawCenteredString(this.font, "==== УРОВЕНЬ ОГНЯ НА ЭКРАНЕ ====", this.width / 2, cy + 110, 0xFF5555);
-        int fireStartX = this.width / 2 - 110; int fireY = cy + 122;
+        graphics.drawCenteredString(this.font, "==== УРОВЕНЬ ОГНЯ ====", this.width / 2, cy + 104, 0xFF5555);
+        int fireStartX = this.width / 2 - 110; int fireY = cy + 114;
         drawGridButton(graphics, "Огонь -5%", fireStartX, fireY, 65, 16, mouseX, mouseY, false);
         drawGridButton(graphics, "Высота: " + RightHandConfig.fireHeightPercent + "%", fireStartX + 69, fireY, 80, 16, mouseX, mouseY, true);
         drawGridButton(graphics, "Огонь +5%", fireStartX + 153, fireY, 65, 16, mouseX, mouseY, false);
+
+        // ДОБАВЛЕНО: Регулировка количества частиц при ударе
+        graphics.drawCenteredString(this.font, "==== КОЛИЧЕСТВО ЧАСТИЦ ПРИ УДАРЕ ====", this.width / 2, cy + 132, 0x55FFFF);
+        int partStartX = this.width / 2 - 110; int partY = cy + 142;
+        drawGridButton(graphics, "Криты -1", partStartX, partY, 65, 16, mouseX, mouseY, false);
+        drawGridButton(graphics, "Штук: " + RightHandConfig.maxHitParticles, partStartX + 69, partY, 80, 16, mouseX, mouseY, true);
+        drawGridButton(graphics, "Криты +1", partStartX + 153, partY, 65, 16, mouseX, mouseY, false);
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
@@ -76,29 +83,31 @@ public class ParticleConfigScreen extends Screen {
             int cy = this.height / 2; int startX = this.width / 2 - 256; int startY = cy - 105; int buttonId = 0;
             for (int col = 0; col < 7; col++) {
                 for (int row = 0; row < 8; row++) {
-                    int btnX = startX + (col * 73); int btnY = startY + (row * 20);
+                    int btnX = startX + (col * 73); int btnY = startY + (row * 21);
                     if (mx >= btnX && mx <= btnX + 70 && my >= btnY && my <= btnY + 16) { RightHandConfig.activeParticleId = buttonId; return true; }
                     buttonId++;
                 }
             }
-            int colorStartX = this.width / 2 - 180; int colorY = cy + 88;
+            int colorStartX = this.width / 2 - 180; int colorY = cy + 86;
             for (int i = 0; i < 5; i++) {
                 int btnX = colorStartX + (i * 73);
                 if (mx >= btnX && mx <= btnX + 70 && my >= colorY && my <= colorY + 16) { RightHandConfig.crosshairColorId = i; return true; }
             }
 
-            int fireStartX = this.width / 2 - 110; int fireY = cy + 122;
+            int fireStartX = this.width / 2 - 110; int fireY = cy + 114;
             if (my >= fireY && my <= fireY + 16) {
-                if (mx >= fireStartX && mx <= fireStartX + 65) {
-                    RightHandConfig.fireHeightPercent = Math.max(0, RightHandConfig.fireHeightPercent - 5);
-                    return true;
-                }
-                if (mx >= fireStartX + 153 && mx <= fireStartX + 218) {
-                    RightHandConfig.fireHeightPercent = Math.min(100, RightHandConfig.fireHeightPercent + 5);
-                    return true;
-                }
+                if (mx >= fireStartX && mx <= fireStartX + 65) { RightHandConfig.fireHeightPercent = Math.max(0, RightHandConfig.fireHeightPercent - 5); return true; }
+                if (mx >= fireStartX + 153 && mx <= fireStartX + 218) { RightHandConfig.fireHeightPercent = Math.min(100, RightHandConfig.fireHeightPercent + 5); return true; }
+            }
+
+            // ДОБАВЛЕНО: Обработка кликов по кнопкам количества критов
+            int partStartX = this.width / 2 - 110; int partY = cy + 142;
+            if (my >= partY && my <= partY + 16) {
+                if (mx >= partStartX && mx <= partStartX + 65) { RightHandConfig.maxHitParticles = Math.max(0, RightHandConfig.maxHitParticles - 1); return true; }
+                if (mx >= partStartX + 153 && mx <= partStartX + 218) { RightHandConfig.maxHitParticles = Math.min(50, RightHandConfig.maxHitParticles + 1); return true; }
             }
         }
         return super.mouseClicked(mx, my, button);
     }
 }
+
