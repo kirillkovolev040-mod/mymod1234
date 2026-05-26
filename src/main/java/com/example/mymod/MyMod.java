@@ -40,7 +40,7 @@ public class MyMod {
         NeoForge.EVENT_BUS.register(new MyFire());
         NeoForge.EVENT_BUS.register(new MyHud()); 
         
-        // Регистрируем наши раздельные независимые файлы рендереров рук
+        // ОСТАВЛЯЕМ: Раздельная и чистая регистрация независимых файлов рук!
         NeoForge.EVENT_BUS.register(new RightHandRenderer());
         NeoForge.EVENT_BUS.register(new LeftHandRenderer());
     }
@@ -76,7 +76,7 @@ public class MyMod {
         }
         wasClicking = isDown;
         
-        // ИСПРАВЛЕНО: Меню К теперь открывается ВСЕГДА, даже если в руке абсолютно пусто!
+        // Меню К теперь открывается ВСЕГДА, даже с пустой рукой
         boolean isKDown = MyKeyBindings.OPEN_RIGHT_CONFIG.isDown();
         if (isKDown && !wasKeyKDown && mc.screen == null) {
             mc.setScreen(new RightConfigScreen());
