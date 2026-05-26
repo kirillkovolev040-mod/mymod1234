@@ -2,37 +2,26 @@ package com.example.mymod;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 
 public class RightHandRenderer {
     @SubscribeEvent
     public void onRenderRightHand(RenderHandEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-
-        ItemStack itemStack = event.getItemStack();
-        if (itemStack.isEmpty()) return;
-
-        // ЖЕСТКАЯ ПРОВЕРКА: Проверяем, что рендерится предмет из ПРАВОЙ руки игрока
-        ItemStack mainHandItem = mc.player.getMainHandItem();
-        if (event.getHand() == InteractionHand.MAIN_HAND && itemStack == mainHandItem) {
-            PoseStack poseStack = event.getPoseStack();
-            float swingProgress = event.getSwingProgress();
+        PoseStack poseStack = event.getPoseStack();
+        
+        // УПРАВЛЕНИЕ СТРОГО ПРАВОЙ РУКОЙ
+        if (event.getHand() == InteractionHand.MAIN_HAND) {
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // ИЗОЛЯЦИЯ МАТРИЦЫ: Замораживаем чистый стек кадра для правой руки
-            poseStack.pushPose();
-            
-            // Применяем настройки расположения и масштаба строго для ПРАВОЙ руки
+            // Применяем настройки расположения и масштаба для правой руки (БЕЗ push/pop!)
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
             // Анимации атаки правой руки
+            float swingProgress = event.getSwingProgress();
             if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
                 float f = Mth.sin(swingProgress * (float)Math.PI);
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
@@ -52,9 +41,6 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
-            
-            // Закрываем стек. Изменения применятся к правой руке, но полностью сотрутся перед левой!
-            poseStack.popPose();
         }
     }
 }
