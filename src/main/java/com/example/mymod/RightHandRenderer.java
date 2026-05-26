@@ -2,24 +2,33 @@ package com.example.mymod;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.util.Mth;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Mth;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 
 public class RightHandRenderer {
     @SubscribeEvent
     public void onRenderRightHand(RenderHandEvent event) {
-        // УПРАВЛЕНИЕ СТРОГО ПРАВОЙ РУКОЙ
-        if (event.getHand() == InteractionHand.MAIN_HAND) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        ItemStack itemStack = event.getItemStack();
+        if (itemStack.isEmpty()) return;
+
+        // ЖЕСТКАЯ ПРОВЕРКА: Проверяем, что рендерится предмет из ПРАВОЙ руки игрока
+        ItemStack mainHandItem = mc.player.getMainHandItem();
+        if (event.getHand() == InteractionHand.MAIN_HAND && itemStack == mainHandItem) {
             PoseStack poseStack = event.getPoseStack();
             float swingProgress = event.getSwingProgress();
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // ИЗОЛЯЦИЯ МАТРИЦЫ: Работает только внутри этого кадра
+            // ИЗОЛЯЦИЯ МАТРИЦЫ: Замораживаем чистый стек кадра для правой руки
             poseStack.pushPose();
             
-            // Применяем настройки расположения и масштаба для правой руки
+            // Применяем настройки расположения и масштаба строго для ПРАВОЙ руки
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -44,9 +53,8 @@ public class RightHandRenderer {
                 }
             }
             
-            // ВАЖНО: Мы НЕ пишем popPose() в самом конце, Майнкрафт сделает это сам при отрисовке.
-            // Но чтобы правая матрица не застряла в левой руке, мы даем NeoForge команду 
-            // применить эти трансформации ИСКЛЮЧИТЕЛЬНО к текущему рендеру предмета!
+            // Закрываем стек. Изменения применятся к правой руке, но полностью сотрутся перед левой!
+            poseStack.popPose();
         }
     }
 }
