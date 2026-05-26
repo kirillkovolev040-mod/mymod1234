@@ -9,13 +9,14 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.minecraft.client.gui.GuiLayers;
+import net.minecraft.resources.ResourceLocation;
 
 public class MyHud {
 
+    // ИСПРАВЛЕНО: Заменили привязку к классу GuiLayers на проверку системного пути прицела
     @SubscribeEvent
     public void onRenderCrosshairPre(RenderGuiLayerEvent.Pre event) {
-        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
+        if (event.getName() != null && event.getName().getPath().contains("crosshair")) {
             int colorId = RightHandConfig.crosshairColorId;
             if (colorId == 1) { RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 1.0f); } 
             else if (colorId == 2) { RenderSystem.setShaderColor(1.0f, 0.0f, 0.0f, 1.0f); } 
@@ -27,7 +28,7 @@ public class MyHud {
 
     @SubscribeEvent
     public void onRenderCrosshairPost(RenderGuiLayerEvent.Post event) {
-        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
+        if (event.getName() != null && event.getName().getPath().contains("crosshair")) {
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
