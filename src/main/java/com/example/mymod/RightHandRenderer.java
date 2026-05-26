@@ -13,17 +13,14 @@ public class RightHandRenderer {
         // УПРАВЛЕНИЕ СТРОГО ПРАВОЙ РУКОЙ
         if (event.getHand() == InteractionHand.MAIN_HAND) {
             PoseStack poseStack = event.getPoseStack();
-            
-            poseStack.pushPose(); // Замораживаем чистую матрицу перед изменениями K
-            
+            float swingProgress = event.getSwingProgress();
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Применяем настройки расположения и масштаба ТОЛЬКО для правой руки
+            // Применяем настройки расположения и масштаба. МАТРИЦУ НЕ ЗАКРЫВАЕМ, чтобы игра применила размер к мечу!
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
             // Анимации атаки правой руки
-            float swingProgress = event.getSwingProgress();
             if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
                 float f = Mth.sin(swingProgress * (float)Math.PI);
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
@@ -43,8 +40,6 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
-            
-            poseStack.popPose(); // Мгновенно стираем правые настройки, чтобы они не улетели в левую руку!
         }
     }
 }
