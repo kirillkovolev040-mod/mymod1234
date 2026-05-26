@@ -12,13 +12,13 @@ public class MyFire {
                 int percent = RightHandConfig.fireHeightPercent;
                 
                 if (percent == 0) {
-                    // 0% — Полная невидимость огня
+                    // 0% — Огонь полностью выключен, экран абсолютно чистый
                     event.setCanceled(true);
                 } else {
-                    // УЛЬТРА-ФОРМУЛА: Плавно опускает огонь по капле на основе твоих процентов
-                    // При 100% сдвиг равен 0.0 (дефолт), при 10% уходит глубоко вниз, оставляя полоску
+                    // ПОДКОРРЕКТИРОВАНО: Смягчили шаг смещения.
+                    // Теперь текстура не улетает под экран на 30%, а плавно доходит до самого низа к 5%
                     float multiplier = 1.0f - (percent / 100.0f);
-                    float shiftY = multiplier * -0.65f;
+                    float shiftY = multiplier * -0.42f; 
                     
                     if (percent < 100) {
                         event.getPoseStack().translate(0.0D, (double)shiftY, 0.0D);
