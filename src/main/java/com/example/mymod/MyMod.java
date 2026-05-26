@@ -59,7 +59,6 @@ public class MyMod {
             if (hitResult != null && hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity target = ((EntityHitResult) hitResult).getEntity();
                 
-                // ОПТИМИЗАЦИЯ СЕРВЕРА: Если цель не видна игроку (за стеной / сзади), не тратим FPS на спавн частиц!
                 if (mc.player.hasLineOfSight(target)) {
                     double x = target.getX(); double y = target.getY(); double z = target.getZ();
                     float height = target.getBbHeight();
@@ -102,32 +101,51 @@ public class MyMod {
         PoseStack poseStack = event.getPoseStack();
         float swingProgress = event.getSwingProgress();
 
-        // ИСПРАВЛЕНО НАМЕРТВО: Проверяем конкретную руку только по физическому типу игрового эвента
         if (event.getHand() == InteractionHand.MAIN_HAND) {
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
+            // ИСПРАВЛЕНЫ И ДОБАВЛЕНЫ ЛУЧШИЕ PvP АНИМАЦИИ
             if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
                 float f = Mth.sin(swingProgress * (float)Math.PI);
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
                 
                 if (RightHandConfig.swingMode == 1) {
-                    poseStack.translate(0.0f, f * 0.1f, 0.0f);
-                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -15.0f));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -10.0f));
-                } else if (RightHandConfig.swingMode == 2) {
-                    poseStack.translate(f1 * 0.15f, f * -0.05f, 0.0f);
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -35.0f));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -25.0f));
+                    // 1. Плавный замах (Старый Block Animation из 1.7.10)
+                    poseStack.translate(0.0f, f * 0.08f, 0.0f);
+                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -18.0f));
+                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -12.0f));
+                } 
+                else if (RightHandConfig.swingMode == 2) {
+                    // 2. PvP Круговой взмах (Lunar Client Style)
+                    poseStack.translate(f1 * 0.12f, f * -0.06f, 0.0f);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -40.0f));
+                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -20.0f));
+                } 
+                else if (RightHandConfig.swingMode == 3) {
+                    // 3. Горизонтальный Слайд (Old-School Блокхит)
+                    poseStack.translate(f1 * -0.15f, 0.0f, f * 0.05f);
+                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -45.0f));
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -10.0f));
+                } 
+                else if (RightHandConfig.swingMode == 4) {
+                    // 4. Хлыст (Хлыстообразный резкий PvP удар сверху-вниз)
+                    poseStack.translate(0.0f, f1 * -0.2f, f * 0.1f);
+                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
+                } 
+                else if (RightHandConfig.swingMode == 5) {
+                    // 5. Полное 3D Вращение меча по спирали
+                    poseStack.translate(0.0f, 0.0f, f * -0.1f);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(swingProgress * 360.0f));
                 }
             }
         } 
         else if (event.getHand() == InteractionHand.OFF_HAND) {
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             
-            // Левая рука теперь на 100% отрезана от изменений правого меню К!
+            // Левая рука полностью изолирована
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
         }
