@@ -37,10 +37,8 @@ class RightConfigScreen extends Screen {
         
         String animName = "Дефолт";
         if (RightHandConfig.swingMode == 1) animName = "Плавный 1.7";
-        if (RightHandConfig.swingMode == 2) animName = "PvP Круговой";
-        if (RightHandConfig.swingMode == 3) animName = "Слайд";
-        if (RightHandConfig.swingMode == 4) animName = "Хлыст";
-        if (RightHandConfig.swingMode == 5) animName = "Статичный";
+        if (RightHandConfig.swingMode == 2) animName = "Слайд";
+        if (RightHandConfig.swingMode == 3) animName = "Хлыст";
         drawCustomButton(graphics, "Удар: " + animName, cx, cy + 74, 120, 18, mouseX, mouseY);
         
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -58,7 +56,7 @@ class RightConfigScreen extends Screen {
                 if (my >= cy + 8  && my <= cy + 26) { RightHandConfig.rightX -= 0.05f; return true; }
                 if (my >= cy + 30 && my <= cy + 48) { RightHandConfig.rightX += 0.05f; return true; }
                 if (my >= cy + 52 && my <= cy + 70) { RightHandConfig.rightScalePercent = (RightHandConfig.rightScalePercent + 10) % 100; return true; }
-                if (my >= cy + 74 && my <= cy + 92) { RightHandConfig.swingMode = (RightHandConfig.swingMode + 1) % 6; return true; }
+                if (my >= cy + 74 && my <= cy + 92) { RightHandConfig.swingMode = (RightHandConfig.swingMode + 1) % 4; return true; } // Максимум 3 режима + дефолт
             }
         }
         return super.mouseClicked(mx, my, button);
@@ -101,6 +99,7 @@ class LeftConfigScreen extends Screen {
         if (button == 0) {
             int cy = this.height / 2; int cx = this.width / 2 - 60;
             if (mx >= cx && mx <= cx + 120) {
+                // Изменяются строго ЛЕВЫЕ переменные
                 if (my >= cy - 75 && my <= cy - 55) { RightHandConfig.leftY += 0.05f; return true; }
                 if (my >= cy - 45 && my <= cy - 25) { RightHandConfig.leftY -= 0.05f; return true; }
                 if (my >= cy - 25 && my <= cy - 5)  { RightHandConfig.leftZ -= 0.05f; return true; }
@@ -113,4 +112,3 @@ class LeftConfigScreen extends Screen {
         return super.mouseClicked(mx, my, button);
     }
 }
-
