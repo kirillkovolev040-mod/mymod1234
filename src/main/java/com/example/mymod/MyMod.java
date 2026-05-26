@@ -1,22 +1,15 @@
 package com.example.mymod;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.util.Mth;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderHandEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod("mymod")
@@ -46,6 +39,10 @@ public class MyMod {
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(new MyFire());
         NeoForge.EVENT_BUS.register(new MyHud()); 
+        
+        // РЕГИСТРИРУЕМ ОТДЕЛЬНЫЕ ФАЙЛЫ РУК НА ШИНУ СОБЫТИЙ
+        NeoForge.EVENT_BUS.register(new RightHandRenderer());
+        NeoForge.EVENT_BUS.register(new LeftHandRenderer());
     }
 
     @SubscribeEvent
@@ -94,55 +91,5 @@ public class MyMod {
         boolean isJDown = MyKeyBindings.OPEN_PARTICLE_CONFIG.isDown();
         if (isJDown && !wasKeyJDown && mc.screen == null) { mc.setScreen(new ParticleConfigScreen()); }
         wasKeyJDown = isJDown;
-    }
-
-    @SubscribeEvent
-    public void onRenderHand(RenderHandEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
-        if (event.getItemStack().isEmpty()) return;
-
-        PoseStack poseStack = event.getPoseStack();
-        float swingProgress = event.getSwingProgress();
-
-        // ИСПРАВЛЕНО НАМЕРТВО: Изолируем вызовы рендера через пуш и поп матриц
-        if (event.getHand() == InteractionHand.MAIN_HAND) {
-            poseStack.pushPose(); // Замораживаем чистую матрицу для правой руки
-            
-            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
-            poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
-            poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
-            
-            if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
-                float f = Mth.sin(swingProgress * (float)Math.PI);
-                float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
-                
-                if (RightHandConfig.swingMode == 1) {
-                    poseStack.translate(0.0f, f * 0.08f, 0.0f);
-                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -18.0f));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -12.0f));
-                } 
-                else if (RightHandConfig.swingMode == 2) {
-                    poseStack.translate(f1 * -0.15f, 0.0f, f * 0.05f);
-                    poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -45.0f));
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -10.0f));
-                } 
-                else if (RightHandConfig.swingMode == 3) {
-                    poseStack.translate(0.0f, f1 * -0.2f, f * 0.1f);
-                    poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
-                }
-            }
-            
-            poseStack.popPose(); // Стираем правые настройки из памяти до того, как игра начнет рисовать левую руку!
-        } 
-        else if (event.getHand() == InteractionHand.OFF_HAND) {
-            poseStack.pushPose(); // Замораживаем чистую матрицу для левой руки
-            
-            float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
-            poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
-            poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
-            
-            poseStack.popPose(); // Очищаем стек кадра
-        }
     }
 }
