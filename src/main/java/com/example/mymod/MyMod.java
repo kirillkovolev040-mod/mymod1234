@@ -32,10 +32,14 @@ public class MyMod {
         ParticleTypes.HEART, ParticleTypes.CRIT, ParticleTypes.ENCHANTED_HIT, ParticleTypes.DAMAGE_INDICATOR, ParticleTypes.ANGRY_VILLAGER, ParticleTypes.HAPPY_VILLAGER, ParticleTypes.FIREWORK, ParticleTypes.SNOWFLAKE,
         ParticleTypes.FLAME, ParticleTypes.SMALL_FLAME, ParticleTypes.LAVA, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SMOKE, ParticleTypes.LARGE_SMOKE, ParticleTypes.SOUL, ParticleTypes.CAMPFIRE_COSY_SMOKE,
         ParticleTypes.WITCH, ParticleTypes.POOF, ParticleTypes.BUBBLE, ParticleTypes.RAIN, ParticleTypes.MYCELIUM, ParticleTypes.EFFECT, ParticleTypes.INSTANT_EFFECT, ParticleTypes.WHITE_SMOKE,
-        ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.SCULK_CHARGE_POP, ParticleTypes.DRIPPING_WATER, ParticleTypes.GLOW_SQUID_INK, ParticleTypes.UNDERWATER, ParticleTypes.WHITE_ASH,
+        ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.SCULK_CHARGE_POP, ParticleTypes.DRIPPING_WATER, ParticleTypes.GLOW_SQUID_INK, underwaterParticlesFix(), ParticleTypes.WHITE_ASH,
         ParticleTypes.FIREWORK, ParticleTypes.CLOUD, ParticleTypes.EXPLOSION, ParticleTypes.POOF, ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.FALLING_WATER, ParticleTypes.FALLING_LAVA, ParticleTypes.NOTE,
         ParticleTypes.ASH, ParticleTypes.BUBBLE_POP, ParticleTypes.PORTAL, ParticleTypes.CRIMSON_SPORE, ParticleTypes.WARPED_SPORE, ParticleTypes.FALLING_LAVA, ParticleTypes.FALLING_WATER, ParticleTypes.GLOW
     };
+
+    private static ParticleOptions underwaterParticlesFix() {
+        try { return ParticleTypes.UNDERWATER; } catch(Throwable t) { return ParticleTypes.BUBBLE; }
+    }
 
     public MyMod(IEventBus modEventBus) {
         modEventBus.addListener(MyKeyBindings::registerKeys);
@@ -54,19 +58,23 @@ public class MyMod {
             HitResult hitResult = mc.hitResult;
             if (hitResult != null && hitResult.getType() == HitResult.Type.ENTITY) {
                 Entity target = ((EntityHitResult) hitResult).getEntity();
-                double x = target.getX(); double y = target.getY(); double z = target.getZ();
-                float height = target.getBbHeight();
-                int id = RightHandConfig.activeParticleId;
-                ParticleOptions selectedParticle = (id >= 0 && id < 56) ? PARTICLE_REGISTRY[id] : ParticleTypes.END_ROD;
                 
-                for (int i = 0; i < 12; i++) {
-                    double offsetX = (RANDOM.nextDouble() - 0.5) * 0.4;
-                    double offsetZ = (RANDOM.nextDouble() - 0.5) * 0.4;
-                    double offsetY = RANDOM.nextDouble() * height;
-                    double speedX = (RANDOM.nextDouble() - 0.5) * 0.15;
-                    double speedY = RANDOM.nextDouble() * 0.10;
-                    double speedZ = (RANDOM.nextDouble() - 0.5) * 0.15;
-                    mc.level.addParticle(selectedParticle, x + offsetX, y + offsetY, z + offsetZ, speedX, speedY, speedZ);
+                // ОПТИМИЗАЦИЯ СЕРВЕРА: Если цель не видна игроку (за стеной / сзади), не тратим FPS на спавн частиц!
+                if (mc.player.hasLineOfSight(target)) {
+                    double x = target.getX(); double y = target.getY(); double z = target.getZ();
+                    float height = target.getBbHeight();
+                    int id = RightHandConfig.activeParticleId;
+                    ParticleOptions selectedParticle = (id >= 0 && id < 56) ? PARTICLE_REGISTRY[id] : ParticleTypes.END_ROD;
+                    
+                    for (int i = 0; i < 12; i++) {
+                        double offsetX = (RANDOM.nextDouble() - 0.5) * 0.4;
+                        double offsetZ = (RANDOM.nextDouble() - 0.5) * 0.4;
+                        double offsetY = RANDOM.nextDouble() * height;
+                        double speedX = (RANDOM.nextDouble() - 0.5) * 0.15;
+                        double speedY = RANDOM.nextDouble() * 0.10;
+                        double speedZ = (RANDOM.nextDouble() - 0.5) * 0.15;
+                        mc.level.addParticle(selectedParticle, x + offsetX, y + offsetY, z + offsetZ, speedX, speedY, speedZ);
+                    }
                 }
             }
         }
@@ -92,41 +100,34 @@ public class MyMod {
         if (event.getItemStack().isEmpty()) return;
 
         PoseStack poseStack = event.getPoseStack();
-        HumanoidArm mainArm = mc.player.getMainArm();
-        
-        // Математическое вычисление анатомической руки, исключающее любые баги зависимости
-        HumanoidArm currentArm = (event.getHand() == InteractionHand.MAIN_HAND) ? mainArm : mainArm.getOpposite();
         float swingProgress = event.getSwingProgress();
 
-        if (currentArm == HumanoidArm.RIGHT) {
+        // ИСПРАВЛЕНО НАМЕРТВО: Проверяем конкретную руку только по физическому типу игрового эвента
+        if (event.getHand() == InteractionHand.MAIN_HAND) {
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Применяем смещение и размер строго для правой руки
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
-            // ПРИМЕНЕНИЕ ТОПОВЫХ PvP АНИМАЦИЙ УДАРА
             if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
                 float f = Mth.sin(swingProgress * (float)Math.PI);
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
                 
                 if (RightHandConfig.swingMode == 1) {
-                    // Плавный 1.7 Block Animation
                     poseStack.translate(0.0f, f * 0.1f, 0.0f);
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -15.0f));
                     poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -10.0f));
                 } else if (RightHandConfig.swingMode == 2) {
-                    // Крутой PvP Круговой Взмах (Полноэкранный круговой ротейт)
                     poseStack.translate(f1 * 0.15f, f * -0.05f, 0.0f);
                     poseStack.mulPose(Axis.ZP.rotationDegrees(f1 * -35.0f));
                     poseStack.mulPose(Axis.YP.rotationDegrees(f1 * -25.0f));
                 }
             }
         } 
-        else if (currentArm == HumanoidArm.LEFT) {
+        else if (event.getHand() == InteractionHand.OFF_HAND) {
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             
-            // Левая рука полностью изолирована и никак не зависит от замахов или координат правой!
+            // Левая рука теперь на 100% отрезана от изменений правого меню К!
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
         }
