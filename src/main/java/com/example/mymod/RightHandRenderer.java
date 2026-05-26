@@ -10,16 +10,20 @@ import net.neoforged.neoforge.client.event.RenderHandEvent;
 public class RightHandRenderer {
     @SubscribeEvent
     public void onRenderRightHand(RenderHandEvent event) {
+        // УПРАВЛЕНИЕ СТРОГО ПРАВОЙ РУКОЙ
         if (event.getHand() == InteractionHand.MAIN_HAND) {
             PoseStack poseStack = event.getPoseStack();
-            float swingProgress = event.getSwingProgress();
+            
+            poseStack.pushPose(); // Замораживаем чистую матрицу перед изменениями K
+            
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Применяем настройки расположения и масштаба для правой руки
+            // Применяем настройки расположения и масштаба ТОЛЬКО для правой руки
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
-            // Анимации атаки
+            // Анимации атаки правой руки
+            float swingProgress = event.getSwingProgress();
             if (swingProgress > 0.0f && RightHandConfig.swingMode > 0) {
                 float f = Mth.sin(swingProgress * (float)Math.PI);
                 float f1 = Mth.sin(Mth.sqrt(swingProgress) * (float)Math.PI);
@@ -39,6 +43,8 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
+            
+            poseStack.popPose(); // Мгновенно стираем правые настройки, чтобы они не улетели в левую руку!
         }
     }
 }
