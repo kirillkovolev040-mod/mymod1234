@@ -9,27 +9,32 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiLayers;
 
 public class MyHud {
 
-    // ИСПРАВЛЕНО: Заменили привязку к классу GuiLayers на проверку системного пути прицела
     @SubscribeEvent
     public void onRenderCrosshairPre(RenderGuiLayerEvent.Pre event) {
-        if (event.getName() != null && event.getName().getPath().contains("crosshair")) {
+        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
             int colorId = RightHandConfig.crosshairColorId;
-            if (colorId == 1) { RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 1.0f); } 
-            else if (colorId == 2) { RenderSystem.setShaderColor(1.0f, 0.0f, 0.0f, 1.0f); } 
-            else if (colorId == 3) { RenderSystem.setShaderColor(0.0f, 0.3f, 1.0f, 1.0f); } 
-            else if (colorId == 4) { RenderSystem.setShaderColor(1.0f, 1.0f, 0.0f, 1.0f); } 
-            else { RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); }
+            if (colorId > 0) {
+                // Магия PvP-клиентов: отключаем инверсию цветов Майнкрафта, чтобы прицел красился!
+                RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+                
+                if (colorId == 1) { RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 1.0f); }      // Зеленый
+                else if (colorId == 2) { RenderSystem.setShaderColor(1.0f, 0.0f, 0.0f, 1.0f); } // Красный
+                else if (colorId == 3) { RenderSystem.setShaderColor(0.0f, 0.4f, 1.0f, 1.0f); } // Синий
+                else if (colorId == 4) { RenderSystem.setShaderColor(1.0f, 1.0f, 0.0f, 1.0f); } // Желтый
+            }
         }
     }
 
     @SubscribeEvent
     public void onRenderCrosshairPost(RenderGuiLayerEvent.Post event) {
-        if (event.getName() != null && event.getName().getPath().contains("crosshair")) {
+        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
+            // Возвращаем все стандартные настройки рендера назад
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.defaultBlendFunc();
         }
     }
 
