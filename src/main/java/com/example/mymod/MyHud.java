@@ -15,27 +15,43 @@ public class MyHud {
 
     @SubscribeEvent
     public void onRenderCrosshairPre(RenderGuiLayerEvent.Pre event) {
-        // ИСПРАВЛЕНО: Используем правильный класс VanillaGuiLayers для версии 1.21.4
+        // Если игра пытается отрисовать стандартный прицел
         if (event.getName().equals(VanillaGuiLayers.CROSSHAIR)) {
             int colorId = RightHandConfig.crosshairColorId;
             if (colorId > 0) {
-                // Магия PvP-клиентов: отключаем инверсию цветов Майнкрафта, чтобы прицел красился!
-                RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+                // ОТМЕНЯЕМ стандартный прицел Майнкрафта, чтобы он не мешал
+                event.setCanceled(true);
                 
-                if (colorId == 1) { RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 1.0f); }      // Зеленый
-                else if (colorId == 2) { RenderSystem.setShaderColor(1.0f, 0.0f, 0.0f, 1.0f); } // Красный
-                else if (colorId == 3) { RenderSystem.setShaderColor(0.0f, 0.4f, 1.0f, 1.0f); } // Синий
-                else if (colorId == 4) { RenderSystem.setShaderColor(1.0f, 1.0f, 0.0f, 1.0f); } // Желтый
-            }
-        }
-    }
+                Minecraft mc = Minecraft.getInstance();
+                GuiGraphics graphics = mc.guiGraphics(); // Получаем графический контекст кадра
+                if (graphics == null || mc.options.hideGui) return;
 
-    @SubscribeEvent
-    public void onRenderCrosshairPost(RenderGuiLayerEvent.Post event) {
-        if (event.getName().equals(VanillaGuiLayers.CROSSHAIR)) {
-            // Возвращаем все стандартные настройки рендера назад
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.defaultBlendFunc();
+                int screenWidth = mc.getWindow().getGuiScaledWidth();
+                int screenHeight = mc.getWindow().getGuiScaledHeight();
+                int centerX = screenWidth / 2;
+                int centerY = screenHeight / 2;
+
+                // Настраиваем выбранный цвет для нашего кастомного прицела
+                int colorHex = 0xFFFFFFFF; // Дефолт (Белый)
+                if (colorId == 1) colorHex = 0xFF00FF00;      // Зеленый
+                else if (colorId == 2) colorHex = 0xFFFF0000; // Красный
+                else if (colorId == 3) colorHex = 0xFF0066FF; // Синий
+                else if (colorId == 4) colorHex = 0xFFFFD700; // Желтый
+
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+
+                // Рисуем аккуратный кастомный PvP-прицел (крестик 4x4) выбранного цвета
+                graphics.fill(centerX - 4, centerY, centerX - 1, centerY + 1, colorHex);
+                graphics.fill(centerX + 2, centerY, centerX + 5, centerY + 1, colorHex);
+                graphics.fill(centerX, centerY - 4, centerX + 1, centerY - 1, colorHex);
+                graphics.fill(centerX, centerY + 2, centerX + 1, centerY + 5, colorHex);
+                
+                // Ставим точку в самом центре
+                graphics.fill(centerX, centerY, centerX + 1, centerY + 1, colorHex);
+                
+                RenderSystem.disableBlend();
+            }
         }
     }
 
