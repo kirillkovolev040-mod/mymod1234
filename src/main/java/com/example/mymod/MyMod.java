@@ -91,15 +91,15 @@ public class MyMod {
 
         PoseStack poseStack = event.getPoseStack();
 
-        // СТРОГОЕ PvP-РАЗДЕЛЕНИЕ: Проверяем физический слот руки в движке игры напрямую
+        // 100% ИЗОЛИРОВАННОЕ ЖЕСТКОЕ РАЗДЕЛЕНИЕ СЛОТОВ ДЛЯ 1.21.4
         if (event.getHand() == InteractionHand.MAIN_HAND) {
-            // Правая рука (или левая, если включен режим левши)
+            // Правая рука работает ТОЛЬКО от правых конфигов (Кнопка K)
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
         } 
         else if (event.getHand() == InteractionHand.OFF_HAND) {
-            // Левая рука (оффхенд / щит / тотем)
+            // Левая рука (оффхенд / щит) работает ТОЛЬКО от левых конфигов (Кнопка I)
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
