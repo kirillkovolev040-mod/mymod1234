@@ -10,13 +10,15 @@ import net.neoforged.neoforge.client.event.RenderHandEvent;
 public class RightHandRenderer {
     @SubscribeEvent
     public void onRenderRightHand(RenderHandEvent event) {
-        PoseStack poseStack = event.getPoseStack();
-        
         // УПРАВЛЕНИЕ СТРОГО ПРАВОЙ РУКОЙ
         if (event.getHand() == InteractionHand.MAIN_HAND) {
+            PoseStack poseStack = event.getPoseStack();
+            
+            poseStack.pushPose(); // Замораживаем локальный стек для правой руки
+            
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Применяем настройки расположения и масштаба для правой руки (БЕЗ push/pop!)
+            // Применяем настройки расположения и масштаба для правой руки (Клавиша K)
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -41,6 +43,8 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
+            
+            poseStack.popPose(); // Сбрасываем локальный стек кадра
         }
     }
 }
