@@ -1,5 +1,6 @@
 package com.example.mymod;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.core.particles.ParticleOptions;
@@ -40,7 +41,6 @@ public class MyMod {
         NeoForge.EVENT_BUS.register(new MyFire());
         NeoForge.EVENT_BUS.register(new MyHud()); 
         
-        // ОСТАВЛЯЕМ: Раздельная и чистая регистрация независимых файлов рук!
         NeoForge.EVENT_BUS.register(new RightHandRenderer());
         NeoForge.EVENT_BUS.register(new LeftHandRenderer());
     }
@@ -76,18 +76,18 @@ public class MyMod {
         }
         wasClicking = isDown;
         
-        // Меню К теперь открывается ВСЕГДА, даже с пустой рукой
-        boolean isKDown = MyKeyBindings.OPEN_RIGHT_CONFIG.isDown();
+        // ИСПРАВЛЕНО: Связали логику тиков с полностью русскими именами переменных клавиш!
+        boolean isKDown = MyKeyBindings.ОТКРЫТЬ_ПРАВУЮ_КОНФИГУРАЦИЮ.isDown();
         if (isKDown && !wasKeyKDown && mc.screen == null) {
             mc.setScreen(new RightConfigScreen());
         }
         wasKeyKDown = isKDown;
 
-        boolean isIDown = MyKeyBindings.OPEN_LEFT_CONFIG.isDown();
+        boolean isIDown = MyKeyBindings.ОТКРЫТЬ_ЛЕВУЮ_КОНФИГУРАЦИЮ.isDown();
         if (isIDown && !wasKeyIDown && mc.screen == null) { mc.setScreen(new LeftConfigScreen()); }
         wasKeyIDown = isIDown;
 
-        boolean isJDown = MyKeyBindings.OPEN_PARTICLE_CONFIG.isDown();
+        boolean isJDown = MyKeyBindings.ОТКРЫТЬ_КОНФИГУРАЦИЮ_ЧАСТИЦ.isDown();
         if (isJDown && !wasKeyJDown && mc.screen == null) { mc.setScreen(new ParticleConfigScreen()); }
         wasKeyJDown = isJDown;
     }
