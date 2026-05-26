@@ -30,8 +30,8 @@ public class MyKeyBindings {
 
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
-        event.register(OPEN_RIGHT_CONFIG);
-        event.register(OPEN_LEFT_CONFIG);
-        event.register(OPEN_PARTICLE_CONFIG);
+        event.register(ОТКРЫТЬ_ПРАВУЮ_КОНФИГУРАЦИЮ);
+        event.register(ОТКРЫТЬ_ЛЕВУЮ_КОНФИГУРАЦИЮ);
+        event.register(ОТКРЫТЬ_КОНФИГУРАЦИЮ_ЧАСТИЦ);
     }
 }
