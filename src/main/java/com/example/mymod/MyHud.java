@@ -9,13 +9,14 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.minecraft.client.gui.GuiLayers;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 public class MyHud {
 
     @SubscribeEvent
     public void onRenderCrosshairPre(RenderGuiLayerEvent.Pre event) {
-        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
+        // ИСПРАВЛЕНО: Используем правильный класс VanillaGuiLayers для версии 1.21.4
+        if (event.getName().equals(VanillaGuiLayers.CROSSHAIR)) {
             int colorId = RightHandConfig.crosshairColorId;
             if (colorId > 0) {
                 // Магия PvP-клиентов: отключаем инверсию цветов Майнкрафта, чтобы прицел красился!
@@ -31,7 +32,7 @@ public class MyHud {
 
     @SubscribeEvent
     public void onRenderCrosshairPost(RenderGuiLayerEvent.Post event) {
-        if (event.getName().equals(GuiLayers.CROSSHAIR)) {
+        if (event.getName().equals(VanillaGuiLayers.CROSSHAIR)) {
             // Возвращаем все стандартные настройки рендера назад
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.defaultBlendFunc();
