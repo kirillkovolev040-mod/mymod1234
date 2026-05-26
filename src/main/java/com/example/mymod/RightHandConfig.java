@@ -16,12 +16,11 @@ public class RightHandConfig {
     // Анимации удара (0 - Дефолт, 1 - Плавный 1.7, 2 - Слайд, 3 - Хлыст)
     public static int swingMode = 1; 
     
-    // Выбранный ID эффекта критов из сетки
+    // Эффекты и Цвета
     public static int activeParticleId = 0;
-    
-    // ID цвета прицела
     public static int crosshairColorId = 0; 
 
-    // Высота огня на экране в процентах (Регулируется в меню J на +-5%)
+    // Настройки меню J (Огонь и Оптимизация частиц)
     public static int fireHeightPercent = 40; 
+    public static int maxHitParticles = 12; // ДОБАВЛЕНО: Регулируемое количество частиц (по дефолту 12)
 }
