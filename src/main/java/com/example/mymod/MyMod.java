@@ -100,24 +100,16 @@ public class MyMod {
     public void onRenderHand(RenderHandEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        
-        ItemStack itemStack = event.getItemStack();
-        if (itemStack.isEmpty()) return;
+        if (event.getItemStack().isEmpty()) return;
 
         PoseStack poseStack = event.getPoseStack();
         float swingProgress = event.getSwingProgress();
 
-        // УЛЬТИМАТИВНЫЙ АНАТОМИЧЕСКИЙ ФИЛЬТР: Проверяем, какой конкретно предмет сейчас рендерится
-        ItemStack mainItem = mc.player.getMainHandItem();
-        ItemStack offItem = mc.player.getOffhandItem();
-
-        boolean isMainHandRender = (event.getHand() == InteractionHand.MAIN_HAND);
-        
-        // Дополнительная проверка на совпадение предметов, чтобы на 100% защититься от бага NeoForge
-        if (isMainHandRender && itemStack == mainItem) {
-            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
+        // ИСПРАВЛЕНО НАМЕРТВО: Изолируем вызовы рендера через пуш и поп матриц
+        if (event.getHand() == InteractionHand.MAIN_HAND) {
+            poseStack.pushPose(); // Замораживаем чистую матрицу для правой руки
             
-            // Правые конфиги К влияют ТОЛЬКО на правый предмет
+            float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -140,13 +132,17 @@ public class MyMod {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
-        } 
-        else if (!isMainHandRender || itemStack == offItem) {
-            float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             
-            // Левая рука I на 100% заблокирована от считывания правых конфигов!
+            poseStack.popPose(); // Стираем правые настройки из памяти до того, как игра начнет рисовать левую руку!
+        } 
+        else if (event.getHand() == InteractionHand.OFF_HAND) {
+            poseStack.pushPose(); // Замораживаем чистую матрицу для левой руки
+            
+            float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
+            
+            poseStack.popPose(); // Очищаем стек кадра
         }
     }
 }
