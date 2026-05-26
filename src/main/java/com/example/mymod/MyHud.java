@@ -15,24 +15,26 @@ public class MyHud {
 
     @SubscribeEvent
     public void onRenderCrosshairPre(RenderGuiLayerEvent.Pre event) {
-        // Если игра пытается отрисовать стандартный прицел
         if (event.getName().equals(VanillaGuiLayers.CROSSHAIR)) {
             int colorId = RightHandConfig.crosshairColorId;
             if (colorId > 0) {
-                // ОТМЕНЯЕМ стандартный прицел Майнкрафта, чтобы он не мешал
+                // Отменяем стандартный прицел
                 event.setCanceled(true);
                 
                 Minecraft mc = Minecraft.getInstance();
-                GuiGraphics graphics = mc.guiGraphics(); // Получаем графический контекст кадра
-                if (graphics == null || mc.options.hideGui) return;
+                if (mc.options.hideGui) return;
+
+                // ИСПРАВЛЕНО: Берем графический контекст кадра напрямую из самого события!
+                GuiGraphics graphics = event.getGuiGraphics(); 
+                if (graphics == null) return;
 
                 int screenWidth = mc.getWindow().getGuiScaledWidth();
                 int screenHeight = mc.getWindow().getGuiScaledHeight();
                 int centerX = screenWidth / 2;
                 int centerY = screenHeight / 2;
 
-                // Настраиваем выбранный цвет для нашего кастомного прицела
-                int colorHex = 0xFFFFFFFF; // Дефолт (Белый)
+                // Настраиваем выбранный цвет
+                int colorHex = 0xFFFFFFFF; 
                 if (colorId == 1) colorHex = 0xFF00FF00;      // Зеленый
                 else if (colorId == 2) colorHex = 0xFFFF0000; // Красный
                 else if (colorId == 3) colorHex = 0xFF0066FF; // Синий
@@ -47,7 +49,7 @@ public class MyHud {
                 graphics.fill(centerX, centerY - 4, centerX + 1, centerY - 1, colorHex);
                 graphics.fill(centerX, centerY + 2, centerX + 1, centerY + 5, colorHex);
                 
-                // Ставим точку в самом центре
+                // Точка в самом центре
                 graphics.fill(centerX, centerY, centerX + 1, centerY + 1, colorHex);
                 
                 RenderSystem.disableBlend();
