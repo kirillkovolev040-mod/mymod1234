@@ -16,7 +16,10 @@ public class RightHandRenderer {
             float swingProgress = event.getSwingProgress();
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Применяем настройки расположения и масштаба. МАТРИЦУ НЕ ЗАКРЫВАЕМ, чтобы игра применила размер к мечу!
+            // ИЗОЛЯЦИЯ КАДРА: Запоминаем чистую матрицу игры
+            poseStack.pushPose();
+            
+            // Применяем настройки расположения и масштаба для правой руки
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -40,6 +43,12 @@ public class RightHandRenderer {
                     poseStack.mulPose(Axis.XP.rotationDegrees(f1 * -35.0f));
                 }
             }
+        } else if (event.getHand() == InteractionHand.OFF_HAND) {
+            // Если событие вызвано для левой руки, но в этом стеке остался «мусор» от правой руки,
+            // мы принудительно возвращаем состояние матрицы назад!
+            try {
+                event.getPoseStack().popPose();
+            } catch (Exception ignored) {}
         }
     }
 }
