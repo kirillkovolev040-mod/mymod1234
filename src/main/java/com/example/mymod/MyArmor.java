@@ -11,7 +11,7 @@ class RightConfigScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, this.width, this.height, 0x60000000); // Без мыла
+        graphics.fill(0, 0, this.width, this.height, 0x60000000);
     }
 
     private void drawCustomButton(GuiGraphics g, String text, int x, int y, int w, int h, int mx, int my) {
@@ -38,9 +38,9 @@ class RightConfigScreen extends Screen {
         String animName = "Дефолт";
         if (RightHandConfig.swingMode == 1) animName = "Плавный 1.7";
         if (RightHandConfig.swingMode == 2) animName = "PvP Круговой";
-        if (RightHandConfig.swingMode == 3) animName = "Слайд (Old-School)";
-        if (RightHandConfig.swingMode == 4) animName = "Хлыст (Lunar)";
-        if (RightHandConfig.swingMode == 5) animName = "3D Вращение";
+        if (RightHandConfig.swingMode == 3) animName = "Слайд";
+        if (RightHandConfig.swingMode == 4) animName = "Хлыст";
+        if (RightHandConfig.swingMode == 5) animName = "Статичный";
         drawCustomButton(graphics, "Удар: " + animName, cx, cy + 74, 120, 18, mouseX, mouseY);
         
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -58,7 +58,7 @@ class RightConfigScreen extends Screen {
                 if (my >= cy + 8  && my <= cy + 26) { RightHandConfig.rightX -= 0.05f; return true; }
                 if (my >= cy + 30 && my <= cy + 48) { RightHandConfig.rightX += 0.05f; return true; }
                 if (my >= cy + 52 && my <= cy + 70) { RightHandConfig.rightScalePercent = (RightHandConfig.rightScalePercent + 10) % 100; return true; }
-                if (my >= cy + 74 && my <= cy + 92) { RightHandConfig.swingMode = (RightHandConfig.swingMode + 1) % 6; return true; } // % 6 для поддержки всех 5 режимов
+                if (my >= cy + 74 && my <= cy + 92) { RightHandConfig.swingMode = (RightHandConfig.swingMode + 1) % 6; return true; }
             }
         }
         return super.mouseClicked(mx, my, button);
@@ -113,3 +113,4 @@ class LeftConfigScreen extends Screen {
         return super.mouseClicked(mx, my, button);
     }
 }
+
