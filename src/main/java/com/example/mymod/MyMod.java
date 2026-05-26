@@ -81,7 +81,6 @@ public class MyMod {
         
         boolean isKDown = MyKeyBindings.OPEN_RIGHT_CONFIG.isDown();
         if (isKDown && !wasKeyKDown && mc.screen == null) {
-            // ИСПРАВЛЕНО: Кнопка K СТРОГО не работает, если в правой руке ничего нет!
             if (!mc.player.getMainHandItem().isEmpty()) {
                 mc.setScreen(new RightConfigScreen());
             }
@@ -101,16 +100,24 @@ public class MyMod {
     public void onRenderHand(RenderHandEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        if (event.getItemStack().isEmpty()) return;
+        
+        ItemStack itemStack = event.getItemStack();
+        if (itemStack.isEmpty()) return;
 
         PoseStack poseStack = event.getPoseStack();
         float swingProgress = event.getSwingProgress();
 
-        // УЛЬТИМАТИВНОЕ РАЗДЕЛЕНИЕ РУК: Сдвигаем СТРОГО только ту руку, которую в данный момент отрисовывает игровой движок
-        if (event.getHand() == InteractionHand.MAIN_HAND) {
+        // УЛЬТИМАТИВНЫЙ АНАТОМИЧЕСКИЙ ФИЛЬТР: Проверяем, какой конкретно предмет сейчас рендерится
+        ItemStack mainItem = mc.player.getMainHandItem();
+        ItemStack offItem = mc.player.getOffhandItem();
+
+        boolean isMainHandRender = (event.getHand() == InteractionHand.MAIN_HAND);
+        
+        // Дополнительная проверка на совпадение предметов, чтобы на 100% защититься от бага NeoForge
+        if (isMainHandRender && itemStack == mainItem) {
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Правые конфиги влияют ТОЛЬКО на правый слот
+            // Правые конфиги К влияют ТОЛЬКО на правый предмет
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -134,10 +141,10 @@ public class MyMod {
                 }
             }
         } 
-        else if (event.getHand() == InteractionHand.OFF_HAND) {
+        else if (!isMainHandRender || itemStack == offItem) {
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             
-            // Левая рука СТРОГО изолирована от правых настроек
+            // Левая рука I на 100% заблокирована от считывания правых конфигов!
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
         }
