@@ -12,14 +12,16 @@ public class MyFire {
                 int percent = RightHandConfig.fireHeightPercent;
                 
                 if (percent == 0) {
-                    // 0% — Полностью отменяем рендер огня, делая экран чистым
+                    // 0% — Полная невидимость огня
                     event.setCanceled(true);
                 } else {
-                    // ИСПРАВЛЕНО: Плавная прогрессия высоты. 100% - стандартный, 5% - еле заметный внизу
-                    float shiftY = -0.5f + ((float) percent / 100.0f) * 0.5f;
-                    // Если огонь меньше 100%, уводим матрицу вниз на основе вычислений
+                    // УЛЬТРА-ФОРМУЛА: Плавно опускает огонь по капле на основе твоих процентов
+                    // При 100% сдвиг равен 0.0 (дефолт), при 10% уходит глубоко вниз, оставляя полоску
+                    float multiplier = 1.0f - (percent / 100.0f);
+                    float shiftY = multiplier * -0.65f;
+                    
                     if (percent < 100) {
-                        event.getPoseStack().translate(0.0D, (double)(shiftY - 0.4f), 0.0D);
+                        event.getPoseStack().translate(0.0D, (double)shiftY, 0.0D);
                     }
                 }
             }
