@@ -64,7 +64,6 @@ public class MyMod {
                     int id = RightHandConfig.activeParticleId;
                     ParticleOptions selectedParticle = (id >= 0 && id < 56) ? PARTICLE_REGISTRY[id] : ParticleTypes.END_ROD;
                     
-                    // ИСПРАВЛЕНО: Теперь спавнится ровно столько частиц, сколько выбрано на ползунке в меню J!
                     int particlesCount = RightHandConfig.maxHitParticles;
                     for (int i = 0; i < particlesCount; i++) {
                         double offsetX = (RANDOM.nextDouble() - 0.5) * 0.4;
@@ -81,7 +80,12 @@ public class MyMod {
         wasClicking = isDown;
         
         boolean isKDown = MyKeyBindings.OPEN_RIGHT_CONFIG.isDown();
-        if (isKDown && !wasKeyKDown && mc.screen == null) { mc.setScreen(new RightConfigScreen()); }
+        if (isKDown && !wasKeyKDown && mc.screen == null) {
+            // ИСПРАВЛЕНО: Кнопка K СТРОГО не работает, если в правой руке ничего нет!
+            if (!mc.player.getMainHandItem().isEmpty()) {
+                mc.setScreen(new RightConfigScreen());
+            }
+        }
         wasKeyKDown = isKDown;
 
         boolean isIDown = MyKeyBindings.OPEN_LEFT_CONFIG.isDown();
@@ -102,11 +106,11 @@ public class MyMod {
         PoseStack poseStack = event.getPoseStack();
         float swingProgress = event.getSwingProgress();
 
-        // ЖЕЛЕЗОБЕТОННЫЙ ИЗОЛИРОВАННЫЙ ФИКС ДЛЯ 1.21.4 (РУКИ РАЗДЕЛЕНЫ НА СЛОТЫ НАМЕРТВО)
+        // УЛЬТИМАТИВНОЕ РАЗДЕЛЕНИЕ РУК: Сдвигаем СТРОГО только ту руку, которую в данный момент отрисовывает игровой движок
         if (event.getHand() == InteractionHand.MAIN_HAND) {
             float rightScaleMultiplier = 1.0f - (RightHandConfig.rightScalePercent / 100.0f);
             
-            // Заставляем матрицу принудительно зафиксировать сдвиг и размер меча
+            // Правые конфиги влияют ТОЛЬКО на правый слот
             poseStack.translate(RightHandConfig.rightX, RightHandConfig.rightY, RightHandConfig.rightZ);
             poseStack.scale(rightScaleMultiplier, rightScaleMultiplier, rightScaleMultiplier);
             
@@ -133,7 +137,7 @@ public class MyMod {
         else if (event.getHand() == InteractionHand.OFF_HAND) {
             float leftScaleMultiplier = 1.0f - (RightHandConfig.leftScalePercent / 100.0f);
             
-            // Левая рука теперь СТРОГО считывает только свои конфиги, правые значения полностью игнорируются!
+            // Левая рука СТРОГО изолирована от правых настроек
             poseStack.translate(RightHandConfig.leftX, RightHandConfig.leftY, RightHandConfig.leftZ);
             poseStack.scale(leftScaleMultiplier, leftScaleMultiplier, leftScaleMultiplier);
         }
