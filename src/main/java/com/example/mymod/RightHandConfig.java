@@ -13,7 +13,7 @@ public class RightHandConfig {
     public static float leftZ = -0.45f;
     public static int leftScalePercent = 40; 
     
-    // Анимация удара (0 - Выкл, 1 - Плавный 1.7, 2 - PvP Круговой)
+    // Выбранная анимация (0 - Выкл, 1 - Плавный 1.7, 2 - PvP Круговой, 3 - Слайд/Блок-хит, 4 - Хлыст, 5 - Вращение)
     public static int swingMode = 1; 
     public static int activeParticleId = 0;
     public static int crosshairColorId = 0; 
